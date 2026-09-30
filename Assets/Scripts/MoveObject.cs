@@ -14,12 +14,12 @@ public class MoveObject : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
             Debug.Log("Saltar");
         if (Input.GetKey(KeyCode.D))
-            transform.Translate(0.01f,0,0);
+            transform.Translate(0.05f,0,0);
         if (Input.GetKey(KeyCode.A))
-            transform.Translate(-0.01f, 0, 0);
+            transform.Translate(-0.05f, 0, 0);
         if (Input.GetKey(KeyCode.W))
-            transform.Translate(0, 0, 0.01f);
+            transform.Translate(0, 0, 0.05f);
         if (Input.GetKey(KeyCode.S))
-            transform.Translate(0, 0, -0.01f);
+            transform.Translate(0, 0, -0.05f);
     }
 }
