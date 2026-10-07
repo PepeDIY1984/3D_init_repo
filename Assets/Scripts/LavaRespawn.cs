@@ -8,7 +8,7 @@ public class LavaRespawn : MonoBehaviour
     {
         Debug.Log("te estas quemando");
 
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("05_InputsAdv");
     }
 
 }
