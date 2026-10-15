@@ -10,11 +10,13 @@ public class EnemigoPatrulla : MonoBehaviour
         if (transform.position.x>6)
         {
             velocidad = -velocidad;
+            GetComponent<Renderer>().material.color=Color.red;
         }
 
         if (transform.position.x<-2)
         {
             velocidad = -velocidad;
+            GetComponent<Renderer>().material.color = Color.blue;
         }
 
         transform.Translate(velocidad * Time.deltaTime, 0, 0);
