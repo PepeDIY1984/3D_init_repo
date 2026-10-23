@@ -8,6 +8,9 @@ TagManager:
   - checkpoint02
   - hijo
   - comida
+  - PickUp
+  - GameObjecConTrigger
+  - GameObjecConColision
   layers:
   - Default
   - TransparentFX

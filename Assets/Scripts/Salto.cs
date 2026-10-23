@@ -11,7 +11,7 @@ public class Salto: MonoBehaviour
     public Vector3 respawnPoint;        //Posici�n asignada al respawn
     public float fallLimit;             //L�mite en -y para respawnear
 
-    private bool tocandoSuelo;
+    private bool tocandoSuelo=true;
 
 
 
@@ -71,12 +71,12 @@ public class Salto: MonoBehaviour
         transform.position = respawnPoint;      //Resetar la posición del player
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        tocandoSuelo = true;
-    }
-    private void OnCollisionExit(Collision collision)
-    {
-        tocandoSuelo = false;
-    }
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    tocandoSuelo = true;
+    //}
+    //private void OnCollisionExit(Collision collision)
+    //{
+    //    tocandoSuelo = false;
+    //}
 }

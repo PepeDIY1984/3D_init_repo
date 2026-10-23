@@ -38,16 +38,6 @@ public class LimitSpeed : MonoBehaviour
     }
 
 
-
-    // METODO TRIGGER para derectar el contacto con los coleccionables
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag("PickUp"))
-        {
-            Destroy(other.gameObject);
-        }
-    }
-
     void Movement()
     {
         //Almaceno el input que nos proporciona Unity
