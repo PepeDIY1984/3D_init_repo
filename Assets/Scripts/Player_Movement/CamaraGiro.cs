@@ -10,56 +10,111 @@ public class CamaraGiro : MonoBehaviour
 
     [Header("Cámara")]
     public Transform camara;
-    public Vector3 distancia = new Vector3(0, 5, -8);
+    public Vector3 distancia = new Vector3(0, 3, -6);
     public float suavizado = 8f;
 
     private Rigidbody rb;
-    private float avance;
-    private float giro;
-    private float angulo;
+
+    // Independiente del rodamiento físico de la bola.
+    private Quaternion orientacion;
     private Quaternion orientacionCamara;
+
+    private float avance;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        angulo = transform.eulerAngles.y;
-        orientacionCamara = Quaternion.Euler(0, angulo, 0);
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        orientacion = transform.rotation;
+        orientacionCamara = orientacion;
     }
 
     void Update()
     {
         avance = Input.GetAxis("Vertical");
-        giro = Input.GetAxis("Horizontal");
 
-        // Guarda una orientación independiente del rodamiento.
-        angulo += giro * velocidadGiro * Time.deltaTime;
+        float giroHorizontal = Input.GetAxis("Horizontal");
+
+        float inclinacion = 0f;
+        float giroLateral = 0f;
+
+        if (Input.GetKey(KeyCode.Q)) inclinacion = -1f;
+        if (Input.GetKey(KeyCode.E)) inclinacion = 1f;
+
+        if (Input.GetKey(KeyCode.Z)) giroLateral = 1f;
+        if (Input.GetKey(KeyCode.C)) giroLateral = -1f;
+
+        float paso = velocidadGiro * Time.deltaTime;
+
+        // Multiplicar por la derecha aplica giros en ejes locales.
+        orientacion =
+            orientacion *
+            Quaternion.AngleAxis(
+                giroHorizontal * paso, Vector3.up
+            ) *
+            Quaternion.AngleAxis(
+                inclinacion * paso, Vector3.right
+            ) *
+            Quaternion.AngleAxis(
+                giroLateral * paso, Vector3.forward
+            );
+
+        orientacion = orientacion.normalized;
     }
 
     void FixedUpdate()
     {
-        Quaternion orientacion = Quaternion.Euler(0, angulo, 0);
-        Vector3 direccion = orientacion * Vector3.forward;
+        Vector3 adelante = orientacion * Vector3.forward;
+        Vector3 arriba = orientacion * Vector3.up;
 
-        rb.AddForce(direccion * avance * fuerza);
+        rb.AddForce(
+            adelante * avance * fuerza,
+            ForceMode.Acceleration
+        );
 
-        // Limita X/Z sin modificar la velocidad vertical.
+        // Limita la velocidad en el plano local de movimiento.
+        // Conserva la componente perpendicular a ese plano.
         Vector3 velocidad = rb.linearVelocity;
 
-        Vector3 horizontal = new Vector3( velocidad.x, 0, velocidad.z );
-        horizontal = Vector3.ClampMagnitude( horizontal, velocidadMaxima );
-        rb.linearVelocity = new Vector3(  horizontal.x, velocidad.y, horizontal.z);
+        Vector3 perpendicular = Vector3.Project(
+            velocidad, arriba
+        );
+
+        Vector3 sobrePlano = velocidad - perpendicular;
+
+        sobrePlano = Vector3.ClampMagnitude(
+            sobrePlano, velocidadMaxima
+        );
+
+        rb.linearVelocity = sobrePlano + perpendicular;
     }
 
     void LateUpdate()
     {
         if (camara == null) return;
 
-        Quaternion orientacionObjetivo = Quaternion.Euler(0, angulo, 0);
+        float factor = 1f - Mathf.Exp(
+            -suavizado * Time.deltaTime
+        );
 
-        float factor = 1f - Mathf.Exp( -suavizado * Time.deltaTime );
+        orientacionCamara = Quaternion.Slerp(
+            orientacionCamara,
+            orientacion,
+            factor
+        );
 
-        orientacionCamara = Quaternion.Slerp(  orientacionCamara,  orientacionObjetivo,  factor );
-        camara.position =    transform.position + orientacionCamara * distancia;
-        camara.LookAt(transform.position, Vector3.up);
+        // La distancia también se interpreta en ejes locales.
+        camara.position =
+            transform.position +
+            orientacionCamara * distancia;
+
+        Vector3 arribaCamara =
+            orientacionCamara * Vector3.up;
+
+        camara.rotation = Quaternion.LookRotation(
+            transform.position - camara.position,
+            arribaCamara
+        );
     }
 }
